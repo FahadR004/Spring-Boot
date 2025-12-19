@@ -1,0 +1,26 @@
+https://start.spring.io/
+
+Artifact name is the name of the project
+
+Packaging Formats
+jar - Java ARchive (We will be using this)
+war - Web ARchive
+
+Add Dependency
+Lombok
+Spring Web
+Spring Data MongoDB
+Spring Boot DevTools
+
+To remove MongoDB Exception in terminal, comment out the dependency in pom.xml
+
+Add @RestController in your main file and use @GetMapping with function to verify it's working.
+
+We will be dividing backend into
+- Service Layers
+- Data Access Layers
+- API Layers
+
+YOU CAN COPY CONNECTION STRING WITH CREDENTIALS IN MONGODB COMPASS IN THE SIDEBAR
+
+Go to https://mvnrepository.com/ to install more dependencies/packages in your project. You need to add dependency in your pom.xml file and add groupid and artifactid
