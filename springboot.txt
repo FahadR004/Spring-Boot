@@ -24,3 +24,132 @@ We will be dividing backend into
 YOU CAN COPY CONNECTION STRING WITH CREDENTIALS IN MONGODB COMPASS IN THE SIDEBAR
 
 Go to https://mvnrepository.com/ to install more dependencies/packages in your project. You need to add dependency in your pom.xml file and add groupid and artifactid
+
+Regarding folder differences:
+The package dev.name.movies is being displayed differently in your IDE versus the tutorial's IDE:
+
+Tutorial IDE: Shows it as a single combined folder dev.name.movies
+Your VSCode: Shows it as separate nested folders dev → name → movies
+
+Both representations are identical. The actual file system always has the nested structure (dev/name/movies), but some IDEs compact the display when there's only one item in each folder level.
+
+@Document(collection = "movies") // This will let the framework know that this class sheet represents each document in the movies collection
+// From Lombok, 
+@Data // handles all getters and setters
+@AllArgsConstructor // creates a constructor will all defined variables as parameters 
+@NoArgsConstructor  // creates a constructor with no parameters
+
+// MongoDB specific
+@Id, @ObjectId
+
+Spring Boot follows the MVC Architecture
+
+Client (Browser/Postman)
+        ↓
+Controller Layer (MovieController)
+        ↓
+Service Layer (MovieService)
+        ↓
+Repository Layer (MovieRepository)
+        ↓
+Database (MongoDB)
+
+We create an interface in the Repository Layer. This is just an interface without any code. By extending MongoRepository, you don't have to write any implementation code for database access; you automatically get these methods by extending MongoRepository.
+This is proxy pattern in which Spring is creating a proxy class that interacts with the db instead of you writing the implementation yourself.
+Uses CGLIB and JDK Dynamic Proxy libraries to generate bytecode (at runtime)
+
+Spring at runtime automatically generates a class when it sees extends MongoRepository and creates an instance of that class and makes it available for Autowired injection.
+
+Bean is an object that Spring creates and manages for you and singleton means only one instance of the object exists throughout the application
+When you run SpringApplication.run(), Spring creates instances of all objects. First, scanning components, then registring what bean needs to be created, then figuring out which components depend on whom (dependency resolution) and then actually creating the bean.
+
+When I use @Service, Spring instantiates the class for me, and I can just use that class using @Autowired? Yes
+Without Autowired, not only would you have to create the constructor, you would have to manually interconnect them as well in the correct order.
+// YOU create the repository
+MovieRepository movieRepository = new MovieRepositoryImpl(database);
+
+// YOU create the service and pass dependencies
+MovieService movieService = new MovieService(movieRepository);
+
+// YOU create the controller and pass dependencies
+MovieController movieController = new MovieController(movieService);
+
+// If you need movieService in another class:
+AdminController adminController = new AdminController(movieService);
+
+// YOU must manage the lifecycle
+// YOU must handle errors
+// YOU must ensure proper shutdown
+
+// This is EXHAUSTING for large applications!
+
+Spring Application Context is the container of all beans
+
+Bean is an object managed by Spring's Inversion of Control container
+So, spring creates, manages it and can inject it into other beans.
+@Service        // Makes it a bean
+@Repository     // Makes it a bean
+@Controller     // Makes it a bean
+@Component      // Makes it a bean
+@Configuration  // Makes it a bean
+
+// Or manually:
+@Configuration
+public class AppConfig {
+    @Bean
+    public MovieService movieService() {
+        return new MovieService();
+    }
+}
+
+Singleton
+Definition: A scope/pattern where only ONE instance of a bean exists in the entire application.
+Spring creates the bean once at startup
+Same instance is reused everywhere
+Multiple @Autowired injections get the same object
+
+@Service
+@Scope("singleton")  // Default - one instance
+public class MovieService {}
+
+@Service
+@Scope("prototype")  // New instance every time
+public class MovieService {}
+
+@Service
+@Scope("request")    // New instance per HTTP request
+public class MovieService {}
+
+@Service
+@Scope("session")    // New instance per user session
+public class MovieService {}
+
+@Autowired
+Definition: An annotation that tells Spring to inject a bean dependency automatically.
+
+Ways to use @Autowired:
+// 1. Field Injection (simple but not recommended)
+@Autowired
+private MovieService movieService;
+
+// 2. Constructor Injection (BEST PRACTICE)
+private final MovieService movieService;
+
+public MovieController(MovieService movieService) {
+    this.movieService = movieService;
+}
+
+// 1. MovieService is a BEAN (Spring manages it)
+// 2. MovieService is a SINGLETON (created once)
+// 3. @Autowired is used to INJECT this bean
+@Service  // ← Makes it a BEAN
+@Scope("singleton")  // ← Makes it SINGLETON (default, so optional)
+public class MovieService {
+    
+    @Autowired  // ← AUTOWIRED injects the MovieRepository bean
+    private MovieRepository movieRepository;
+    
+    public List<Movies> allMovies() {
+        return movieRepository.findAll();
+    }
+}
